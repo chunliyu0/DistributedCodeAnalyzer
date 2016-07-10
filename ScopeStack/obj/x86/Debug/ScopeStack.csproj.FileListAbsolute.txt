@@ -1,0 +1,10 @@
+C:\Users\James\Desktop\NewParser\NewParser\ScopeStack\bin\Debug\ScopeStack.exe
+C:\Users\James\Desktop\NewParser\NewParser\ScopeStack\bin\Debug\ScopeStack.pdb
+C:\Users\James\Desktop\NewParser\NewParser\ScopeStack\obj\x86\Debug\ScopeStack.csprojResolveAssemblyReference.cache
+C:\Users\James\Desktop\NewParser\NewParser\ScopeStack\obj\x86\Debug\ScopeStack.exe
+C:\Users\James\Desktop\NewParser\NewParser\ScopeStack\obj\x86\Debug\ScopeStack.pdb
+C:\Users\Fawcett\Desktop\AnalyzerProject\ScopeStack\bin\Debug\ScopeStack.exe
+C:\Users\Fawcett\Desktop\AnalyzerProject\ScopeStack\bin\Debug\ScopeStack.pdb
+C:\Users\Fawcett\Desktop\AnalyzerProject\ScopeStack\obj\x86\Debug\ScopeStack.csprojResolveAssemblyReference.cache
+C:\Users\Fawcett\Desktop\AnalyzerProject\ScopeStack\obj\x86\Debug\ScopeStack.exe
+C:\Users\Fawcett\Desktop\AnalyzerProject\ScopeStack\obj\x86\Debug\ScopeStack.pdb

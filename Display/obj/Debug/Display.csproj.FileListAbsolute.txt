@@ -1,0 +1,6 @@
+C:\su\cse681\code\Project4HelpF14\AnalyzerProject\Display\bin\Debug\Display.dll.config
+C:\su\cse681\code\Project4HelpF14\AnalyzerProject\Display\bin\Debug\Display.dll
+C:\su\cse681\code\Project4HelpF14\AnalyzerProject\Display\bin\Debug\Display.pdb
+C:\su\cse681\code\Project4HelpF14\AnalyzerProject\Display\obj\Debug\Display.csprojResolveAssemblyReference.cache
+C:\su\cse681\code\Project4HelpF14\AnalyzerProject\Display\obj\Debug\Display.dll
+C:\su\cse681\code\Project4HelpF14\AnalyzerProject\Display\obj\Debug\Display.pdb

@@ -1,0 +1,11 @@
+int i;
+// a C++ comment
+double d;
+char ch = '\n';
+string s = "\n";
+this is a final line with one semiExp; followed by some text
+int p;
+for(int i=0; i<4; ++i)
+  for(int j=0; j<5; ++j)
+    for(int k=0; k<2; ++k)
+      p = i*j*k;

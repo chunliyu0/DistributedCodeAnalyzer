@@ -1,0 +1,20 @@
+
+  What's Changed in New Parser?
+  =============================
+  1. New Version of Toker.cs
+     - Returning Comments now optional and set to false by default
+     - fixed tokenizing the new style strings @"..."
+
+  2. Added some comments to Semi.cs
+
+  To use this new stuff you don't have to start over.  Just copy
+  Toker.cs and Semi.cs into all your projects that use them.
+
+  What's new in the Analyzer?
+  ===========================
+  1. Fixed a bug in Tokenizer that caused it to cycle endlessly
+     on a string with multiple lines.
+  2. Added a GUI to show analysis results
+  3. Use child thread to run Analyzer
+  4. Provide Display package to manage display properties and
+     provide helper functions.

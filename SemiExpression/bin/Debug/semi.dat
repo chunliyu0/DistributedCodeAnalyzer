@@ -1,0 +1,327 @@
+
+  Analyzing file ../../toker.cs
+ ----------------------------------
+  using System ; 
+  using System . IO ; 
+  using System . Text ; 
+  using System . Collections ; 
+  namespace CStoker { 
+  class CToker { 
+  private TextReader ts = null ; 
+  private ArrayList tokBuffer = null ; 
+  private string lineRemainder ; 
+  public CToker ( ) { 
+  tokBuffer = new ArrayList ( ) ; 
+  } 
+  public bool openFile ( string fileName ) { 
+  lineRemainder = "" ; 
+  try { 
+  ts = new StreamReader ( fileName ) ; 
+  } 
+  catch ( Exception ) { 
+  return false ; 
+  } 
+  return true ; 
+  } 
+  public bool openString ( string source ) { 
+  lineRemainder = "" ; 
+  try { 
+  ts = new StringReader ( source ) ; 
+  } 
+  catch ( Exception ) { 
+  return false ; 
+  } 
+  return true ; 
+  } 
+  public void close ( ) { 
+  ts . Close ( ) ; 
+  } 
+  public string readLine ( ) { 
+  StringBuilder temp = new StringBuilder ( ) ; 
+  while ( true ) { 
+  int i = ts . Read ( ) ; 
+  if ( i = = - 1 ) { 
+  return temp . ToString ( ) ; 
+  } 
+  char ch = ( char ) i ; 
+  temp . Append ( ch ) ; 
+  if ( ch = = '\n' ) break ; 
+  } 
+  return temp . ToString ( ) ; 
+  } 
+  bool getLine ( out string line ) { 
+  do { 
+  if ( lineRemainder = = "" ) { 
+  try { 
+  lineRemainder = readLine ( ) ; 
+  if ( lineRemainder = = null | | lineRemainder = = "" ) { 
+  line = "" ; 
+  return false ; 
+  } 
+  } 
+  catch ( Exception except ) { 
+  line = except . Message . ToString ( ) ; 
+  return false ; 
+  } 
+  } 
+  line = extract ( ref lineRemainder ) ; 
+  } 
+  while ( line = = "" & & tokBuffer . Count = = 0 ) ; 
+  return true ; 
+  } 
+  string extract ( ref string lineRemainder ) { 
+  char [ ] whiteChars = { 
+  ' ' , '\t' , '\r' , '\f' } 
+  ; 
+  lineRemainder = lineRemainder . TrimStart ( whiteChars ) ; 
+  int posCppComm = lineRemainder . IndexOf ( "//" ) ; 
+  int posCComm = lineRemainder . IndexOf ( "/*" ) ; 
+  int posDQuote = lineRemainder . IndexOf ( '\"' ) ; 
+  int posSQuote = lineRemainder . IndexOf ( '\'' ) ; 
+  int [ ] positions = { 
+  posCppComm , posCComm , posDQuote , posSQuote } 
+  ; 
+  for ( int i = 0 ; 
+  i < positions . Length ; 
+  + + i ) if ( positions [ i ] = = - 1 ) positions [ i ] = Int32 . MaxValue ; 
+  Array . Sort ( positions ) ; 
+  if ( positions [ 0 ] = = Int32 . MaxValue ) { 
+  string retStr = lineRemainder ; 
+  lineRemainder = "" ; 
+  return retStr ; 
+  } 
+  if ( posCppComm = = positions [ 0 ] ) return extractComment ( ref lineRemainder ) ; 
+  if ( posCComm = = positions [ 0 ] ) return extractComment ( ref lineRemainder ) ; 
+  if ( posDQuote = = positions [ 0 ] ) return extractDQuote ( ref lineRemainder ) ; 
+  if ( posSQuote = = positions [ 0 ] ) return extractSQuote ( ref lineRemainder ) ; 
+  throw new Exception ( "extract failed" ) ; 
+  } 
+  string extractDQuote ( ref string lineRemainder ) { 
+  string retStr ; 
+  int pos = lineRemainder . IndexOf ( '\"' ) ; 
+  if ( pos = = 0 ) { 
+  StringBuilder quote = new StringBuilder ( ) ; 
+  quote . Append ( '\"' ) ; 
+  for ( int i = 1 ; 
+  i < lineRemainder . Length ; 
+  + + i ) { 
+  quote . Append ( lineRemainder [ i ] ) ; 
+  if ( lineRemainder [ i ] = = '\"' ) { 
+  if ( lineRemainder [ i - 1 ] ! = '\\' | | lineRemainder [ i - 2 ] = = '\\' ) { 
+  tokBuffer . Add ( quote . ToString ( ) ) ; 
+  lineRemainder = lineRemainder . Remove ( 0 , i + 1 ) ; 
+  return "" ; 
+  } 
+  } 
+  } 
+  } 
+  else { 
+  retStr = lineRemainder . Remove ( pos , lineRemainder . Length - pos ) ; 
+  lineRemainder = lineRemainder . Remove ( 0 , pos ) ; 
+  return retStr ; 
+  } 
+  throw new Exception ( "extractDQuote failed" ) ; 
+  } 
+  string extractSQuote ( ref string lineRemainder ) { 
+  string retStr ; 
+  int pos = lineRemainder . IndexOf ( '\'' ) ; 
+  if ( pos = = 0 ) { 
+  StringBuilder quote = new StringBuilder ( ) ; 
+  quote . Append ( '\'' ) ; 
+  for ( int i = 1 ; 
+  i < lineRemainder . Length ; 
+  + + i ) { 
+  quote . Append ( lineRemainder [ i ] ) ; 
+  if ( lineRemainder [ i ] = = '\'' ) { 
+  if ( lineRemainder [ i - 1 ] ! = '\\' | | lineRemainder [ i - 2 ] = = '\\' ) { 
+  tokBuffer . Add ( quote . ToString ( ) ) ; 
+  lineRemainder = lineRemainder . Remove ( 0 , i + 1 ) ; 
+  return "" ; 
+  } 
+  } 
+  } 
+  } 
+  else { 
+  retStr = lineRemainder . Remove ( pos , lineRemainder . Length - pos ) ; 
+  lineRemainder = lineRemainder . Remove ( 0 , pos ) ; 
+  return retStr ; 
+  } 
+  throw new Exception ( "extractSQuote failed" ) ; 
+  } 
+  string extractComment ( ref string lineRemainder ) { 
+  string line ; 
+  int pos = lineRemainder . IndexOf ( "//" ) ; 
+  if ( pos = = 0 ) { 
+  if ( lineRemainder [ lineRemainder . Length - 1 ] = = '\n' ) { 
+  lineRemainder = lineRemainder . Remove ( lineRemainder . Length - 1 , 1 ) ; 
+  tokBuffer . Add ( lineRemainder ) ; 
+  lineRemainder = "" ; 
+  return "\n" ; 
+  } 
+  else { 
+  tokBuffer . Add ( lineRemainder ) ; 
+  lineRemainder = "" ; 
+  } 
+  return lineRemainder ; 
+  } 
+  if ( pos > - 1 ) { 
+  line = lineRemainder . Remove ( pos , lineRemainder . Length - pos ) ; 
+  lineRemainder = lineRemainder . Remove ( 0 , pos ) ; 
+  return line ; 
+  } 
+  pos = lineRemainder . IndexOf ( "/*" ) ; 
+  if ( pos > - 1 ) { 
+  if ( pos = = 0 ) { 
+  eatCComment ( ) ; 
+  return "" ; 
+  } 
+  else { 
+  string retStr = lineRemainder . Remove ( pos , lineRemainder . Length - pos ) ; 
+  lineRemainder = lineRemainder . Remove ( 0 , pos ) ; 
+  return retStr ; 
+  } 
+  } 
+  line = lineRemainder ; 
+  lineRemainder = "" ; 
+  return line ; 
+  } 
+  void eatCComment ( ) { 
+  StringBuilder comment = new StringBuilder ( ) ; 
+  while ( true ) { 
+  for ( int i = 0 ; 
+  i < lineRemainder . Length ; 
+  + + i ) { 
+  int pos = lineRemainder . IndexOf ( "*/" ) ; 
+  if ( pos ! = i ) comment . Append ( lineRemainder [ i ] ) ; 
+  else { 
+  comment . Append ( lineRemainder [ i ] ) ; 
+  comment . Append ( lineRemainder [ i + 1 ] ) ; 
+  tokBuffer . Add ( comment . ToString ( ) ) ; 
+  lineRemainder = lineRemainder . Remove ( 0 , i + 2 ) ; 
+  return ; 
+  } 
+  } 
+  comment . Append ( '\n' ) ; 
+  lineRemainder = ts . ReadLine ( ) ; 
+  if ( lineRemainder = = null ) { 
+  throw new Exception ( "encountered eof while processing comment" ) ; 
+  } 
+  } 
+  } 
+  bool IsGrammarPunctuation ( char ch ) { 
+  if ( ch = = '_' ) return false ; 
+  if ( Char . IsPunctuation ( ch ) ) return true ; 
+  return false ; 
+  } 
+  string eatAscii ( ref string tok ) { 
+  string retStr = tok ; 
+  for ( int i = 0 ; 
+  i < tok . Length ; 
+  + + i ) { 
+  if ( IsGrammarPunctuation ( tok [ i ] ) | | Char . IsSymbol ( tok [ i ] ) ) { 
+  retStr = tok . Remove ( i , tok . Length - i ) ; 
+  tok = tok . Remove ( 0 , i ) ; 
+  return retStr ; 
+  } 
+  } 
+  tok = "" ; 
+  return retStr ; 
+  } 
+  string eatPunctuationChar ( ref string tok ) { 
+  string retStr = tok . Remove ( 1 , tok . Length - 1 ) ; 
+  tok = tok . Remove ( 0 , 1 ) ; 
+  return retStr ; 
+  } 
+  bool fillBuffer ( ) { 
+  string line ; 
+  if ( ! this . getLine ( out line ) ) return false ; 
+  if ( line = = "" ) return ( tokBuffer . Count > 0 ) ; 
+  char [ ] delim = { 
+  ' ' , '\t' , '\f' , '\r' } 
+  ; 
+  string [ ] toks = line . Split ( delim ) ; 
+  foreach ( string tok in toks ) { 
+  string temp = tok ; 
+  while ( temp . Length > 0 ) { 
+  if ( IsGrammarPunctuation ( temp [ 0 ] ) | | Char . IsSymbol ( temp [ 0 ] ) ) { 
+  string punc = this . eatPunctuationChar ( ref temp ) ; 
+  tokBuffer . Add ( punc ) ; 
+  } 
+  else { 
+  string ascii = this . eatAscii ( ref temp ) ; 
+  tokBuffer . Add ( ascii ) ; 
+  } 
+  } 
+  } 
+  return true ; 
+  } 
+  public string getTok ( ) { 
+  string tok = peekNextTok ( ) ; 
+  if ( tok ! = "" ) tokBuffer . RemoveAt ( 0 ) ; 
+  return tok ; 
+  } 
+  public string peekNextTok ( ) { 
+  if ( tokBuffer . Count = = 0 ) if ( ! fillBuffer ( ) ) return "" ; 
+  string tok = ( string ) tokBuffer [ 0 ] ; 
+  return tok ; 
+  } 
+  public void pushBack ( string tok ) { 
+  tokBuffer . Insert ( 0 , tok ) ; 
+  } 
+  # if ( TEST_TOKER ) [ STAThread ] static void Main ( string [ ] args ) { 
+  Console . Write ( "\n  Testing CToker - Tokenizer " ) ; 
+  Console . Write ( "\n ============================\n" ) ; 
+  CToker toker = new CToker ( ) ; 
+  if ( args . Length = = 0 ) { 
+  Console . Write ( "\n  Please enter name of file to tokenize\n\n" ) ; 
+  return ; 
+  } 
+  foreach ( string file in args ) { 
+  string msg1 ; 
+  if ( ! toker . openFile ( file ) ) { 
+  msg1 = "Can't open file " + file ; 
+  Console . Write ( "\n\n  {0}" , msg1 ) ; 
+  Console . Write ( "\n  {0}" , new string ( '-' , msg1 . Length ) ) ; 
+  } 
+  else { 
+  msg1 = "Processing file " + file ; 
+  Console . Write ( "\n\n  {0}" , msg1 ) ; 
+  Console . Write ( "\n  {0}" , new string ( '-' , msg1 . Length ) ) ; 
+  string tok = "" ; 
+  while ( ( tok = toker . getTok ( ) ) ! = "" ) if ( tok ! = "\n" ) Console . Write ( "\n{0}" , tok ) ; 
+  toker . close ( ) ; 
+  } 
+  } 
+  Console . Write ( "\n" ) ; 
+  string [ ] msgs = new string [ 9 ] ; 
+  msgs [ 0 ] = "abc" ; 
+  msgs [ 1 ] = "string with double quotes \"first quote\"" + " and \"second quote\" but no more" ; 
+  msgs [ 2 ] = "string with single quotes \'1\' and \'2\'" ; 
+  msgs [ 3 ] = "string with quotes \"first quote\" and \'2\'" ; 
+  msgs [ 4 ] = "string with C comments /* first */ and /*second*/ but no more" ; 
+  msgs [ 5 ] = "/* single C comment */" ; 
+  msgs [ 6 ] = " -- /* another single comment */ --" ; 
+  msgs [ 7 ] = "// a C++ comment\n" ; 
+  msgs [ 8 ] = "// another C++ comment\n" ; 
+  foreach ( string msg in msgs ) { 
+  if ( ! toker . openString ( msg ) ) { 
+  string msg2 = "Can't open string for reading" ; 
+  Console . Write ( "\n\n  {0}" , msg2 ) ; 
+  Console . Write ( "\n  {0}" , new string ( '-' , msg2 . Length ) ) ; 
+  } 
+  else { 
+  string msg2 = "Processing \"" + msg + "\"" ; 
+  Console . Write ( "\n\n  {0}" , msg2 ) ; 
+  Console . Write ( "\n  {0}" , new string ( '-' , msg2 . Length ) ) ; 
+  string tok = "" ; 
+  while ( ( tok = toker . getTok ( ) ) ! = "" ) { 
+  if ( tok ! = "\n" ) Console . Write ( "\n{0}" , tok ) ; 
+  else Console . Write ( "\nnewline" ) ; 
+  } 
+  toker . close ( ) ; 
+  } 
+  } 
+  Console . Write ( "\n\n" ) ; 
+  } 
+  # endif } 
+  } 
